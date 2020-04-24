@@ -13,6 +13,8 @@ type
     procedure tmrFSMouseTimer(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+    procedure FormMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
   private
     { Private declarations }
     fFullScreenState: Boolean;
@@ -41,6 +43,16 @@ end;
 procedure TForm1.FormDblClick(Sender: TObject);
 begin
   FullScreen := not FullScreen;
+end;
+
+procedure TForm1.FormMouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  if not FullScreen then
+  begin
+    ReleaseCapture;
+    Perform(WM_SYSCOMMAND, $F012, 0);
+  end;
 end;
 
 procedure TForm1.FormMouseMove(Sender: TObject; Shift: TShiftState; X,
