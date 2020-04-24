@@ -11,10 +11,14 @@ object Form1: TForm1
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  OnCreate = FormCreate
   OnDblClick = FormDblClick
+  OnMouseMove = FormMouseMove
   PixelsPerInch = 96
   TextHeight = 13
-  object Timer1: TTimer
+  object tmrFSMouse: TTimer
+    Interval = 100
+    OnTimer = tmrFSMouseTimer
     Left = 144
     Top = 72
   end

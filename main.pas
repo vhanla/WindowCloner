@@ -8,13 +8,17 @@ uses
 
 type
   TForm1 = class(TUForm)
-    Timer1: TTimer;
+    tmrFSMouse: TTimer;
     procedure FormDblClick(Sender: TObject);
+    procedure tmrFSMouseTimer(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
   private
     { Private declarations }
     fFullScreenState: Boolean;
     fPrevRect: TRect;
     fPrevStyle: TBorderStyle;
+    fPrevFSCursor: TPoint;
     procedure SetFullScreen(Enabled: Boolean);
   public
     { Public declarations }
@@ -29,16 +33,28 @@ implementation
 
 {$R *.dfm}
 
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  tmrFSMouse.Enabled := False;
+end;
+
 procedure TForm1.FormDblClick(Sender: TObject);
 begin
   FullScreen := not FullScreen;
 end;
 
+procedure TForm1.FormMouseMove(Sender: TObject; Shift: TShiftState; X,
+  Y: Integer);
+begin
+  if FullScreen and (fPrevFSCursor <> Mouse.CursorPos) then
+    ShowCursor(True);
+end;
+
 procedure TForm1.SetFullScreen(Enabled: Boolean);
 begin
+  fFullScreenState := Enabled;
   if Enabled then
   begin
-    fFullScreenState := Enabled;
     fPrevRect.Top := Top;
     fPrevRect.Left := Left;
     fPrevRect.Width := Width;
@@ -49,16 +65,37 @@ begin
     ClientHeight := Screen.Monitors[0].Height;
     fPrevStyle := BorderStyle;
     BorderStyle := bsNone;
+    tmrFSMouse.Enabled := True;
   end
   else
   begin
-    fFullScreenState := Enabled;
     Left := fPrevRect.Left;
     Top := fPrevRect.Top;
     ClientWidth := fPrevRect.Width;
     ClientHeight := fPrevRect.Height;
     BorderStyle := fPrevStyle;
+    tmrFSMouse.Enabled := False;
+    ShowCursor(True);
   end;
+end;
+
+procedure TForm1.tmrFSMouseTimer(Sender: TObject);
+begin
+  if FullScreen then
+  begin
+    if (fPrevFSCursor.X+2 >= Mouse.CursorPos.X)
+    and (fPrevFSCursor.X-2 <= Mouse.CursorPos.X)
+    and (fPrevFSCursor.Y+2 >= Mouse.CursorPos.Y)
+    and (fPrevFSCursor.Y-2 <= Mouse.CursorPos.Y)
+    then
+    begin
+      ShowCursor(False);
+    end
+    else
+      ShowCursor(True);
+    fPrevFSCursor := Mouse.CursorPos;
+  end
+  else ShowCursor(True);
 end;
 
 end.
