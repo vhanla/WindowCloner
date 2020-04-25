@@ -13,6 +13,7 @@ object Form1: TForm1
   OldCreateOrder = False
   OnCreate = FormCreate
   OnDblClick = FormDblClick
+  OnDestroy = FormDestroy
   OnMouseDown = FormMouseDown
   OnMouseMove = FormMouseMove
   PixelsPerInch = 96
@@ -22,5 +23,10 @@ object Form1: TForm1
     OnTimer = tmrFSMouseTimer
     Left = 144
     Top = 72
+  end
+  object TrayIcon1: TTrayIcon
+    Visible = True
+    Left = 216
+    Top = 104
   end
 end
