@@ -83,6 +83,10 @@ type
     procedure N1001Click(Sender: TObject);
     procedure PopupMenu1Popup(Sender: TObject);
     procedure FormResize(Sender: TObject);
+    procedure FormMouseWheelDown(Sender: TObject; Shift: TShiftState;
+      MousePos: TPoint; var Handled: Boolean);
+    procedure FormMouseWheelUp(Sender: TObject; Shift: TShiftState;
+      MousePos: TPoint; var Handled: Boolean);
   private
     { Private declarations }
     fFullScreenState: Boolean;
@@ -186,6 +190,44 @@ procedure TForm1.FormMouseMove(Sender: TObject; Shift: TShiftState; X,
 begin
   if FullScreen and (fPrevFSCursor <> Mouse.CursorPos) then
     ShowCursor(True);
+end;
+
+procedure TForm1.FormMouseWheelDown(Sender: TObject; Shift: TShiftState;
+  MousePos: TPoint; var Handled: Boolean);
+var
+  newRect: TRect;
+  aspect: Double;
+  prevWidth, prevHeight: Integer;
+begin
+  if FullScreen then Exit;
+
+  aspect := Height / Width;
+  newRect := ClientRect;
+  prevWidth := Width;
+  prevHeight := Height;
+  Width := Width - 10;
+  Height := Round(aspect * Width);
+  Left := Left + (prevWidth - Width) div 2;
+  Top := Top + (prevHeight - Height) div 2;
+end;
+
+procedure TForm1.FormMouseWheelUp(Sender: TObject; Shift: TShiftState;
+  MousePos: TPoint; var Handled: Boolean);
+var
+  newRect: TRect;
+  aspect: Double;
+  prevWidth, prevHeight: Integer;
+begin
+  if FullScreen then Exit;
+
+  aspect := Height / Width;
+  newRect := ClientRect;
+  prevWidth := Width;
+  prevHeight := Height;
+  Width := Width + 10;
+  Height := Round(aspect * Width);
+  Left := Left - (Width - prevWidth) div 2;
+  Top := Top - (Height - prevHeight) div 2;
 end;
 
 procedure TForm1.FormResize(Sender: TObject);
@@ -457,8 +499,8 @@ begin
       ThumbProp.rcDestination := Rect(
         0,
         0,
-        Width,
-        Height
+        ClientWidth,
+        ClientHeight
       );
       DwmUpdateThumbnailProperties(fThumbWindow, ThumbProp);
     end;
