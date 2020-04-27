@@ -88,9 +88,12 @@ type
       MousePos: TPoint; var Handled: Boolean);
     procedure FormMouseWheelUp(Sender: TObject; Shift: TShiftState;
       MousePos: TPoint; var Handled: Boolean);
+    procedure ClickThrough1Click(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
   private
     { Private declarations }
     fFullScreenState: Boolean;
+    fClickThrough: Boolean;
     fPrevRect: TRect;
     fPrevStyle: TBorderStyle;
     fPrevFSCursor: TPoint;
@@ -101,6 +104,7 @@ type
     fThumbWindow: HTHUMBNAIL;
     fCurrentWindow: HWND;
     procedure SetFullScreen(Enabled: Boolean);
+    procedure SetClickThrough(Enabled: Boolean);
     procedure SetOpacity(Sender: TObject);
     procedure ListWindows(var Menu: TMenuItem);
     procedure HandleWindowListClick(Sender: TObject);
@@ -109,6 +113,7 @@ type
     { Public declarations }
   published
     property FullScreen: Boolean read fFullScreenState write SetFullScreen;
+    property ClickThrough: Boolean read fClickThrough write SetClickThrough;
   end;
 
 var
@@ -127,9 +132,19 @@ begin
     SwitchToThisWindow(fCurrentWindow, True);
 end;
 
+procedure TForm1.ClickThrough1Click(Sender: TObject);
+begin
+  ClickThrough := not ClickThrough;
+end;
+
 procedure TForm1.Exit2Click(Sender: TObject);
 begin
   Close;
+end;
+
+procedure TForm1.FormActivate(Sender: TObject);
+begin
+  ClickThrough := False;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -163,6 +178,8 @@ begin
 
   fMenuesCount := 0;
   fCurrentWindow := 0;
+
+  Application.OnActivate := FormActivate;
 end;
 
 procedure TForm1.FormDblClick(Sender: TObject);
@@ -423,6 +440,19 @@ end;
 procedure TForm1.PopupMenu1Popup(Sender: TObject);
 begin
   ListWindows(ListWindows1);
+end;
+
+procedure TForm1.SetClickThrough(Enabled: Boolean);
+begin
+  fClickThrough := Enabled;
+  if Enabled then
+  begin
+    SetWindowLong(Handle, GWL_EXSTYLE, GetWindowLong(Handle, GWL_EXSTYLE) or WS_EX_TRANSPARENT);
+  end
+  else
+  begin
+    SetWindowLong(Handle, GWL_EXSTYLE, GetWindowLong(Handle, GWL_EXSTYLE) and not WS_EX_TRANSPARENT);
+  end;
 end;
 
 procedure TForm1.SetFullScreen(Enabled: Boolean);

@@ -12,6 +12,7 @@ object Form1: TForm1
   Font.Style = []
   OldCreateOrder = False
   PopupMenu = PopupMenu1
+  OnActivate = FormActivate
   OnCreate = FormCreate
   OnDblClick = FormDblClick
   OnDestroy = FormDestroy
@@ -71,6 +72,7 @@ object Form1: TForm1
     end
     object ClickThrough1: TMenuItem
       Caption = 'Click Through'
+      OnClick = ClickThrough1Click
     end
     object Opacity1: TMenuItem
       Caption = 'Opacity'
