@@ -5,12 +5,35 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, UCL.Form, Vcl.ExtCtrls, UCL.ThemeManager, TUPopupMenu,
-  Vcl.Menus, UCL.PopupMenu;
+  Vcl.Menus, UCL.PopupMenu, System.ImageList, Vcl.ImgList;
 
 type
   TForm1 = class(TUForm)
     tmrFSMouse: TTimer;
     TrayIcon1: TTrayIcon;
+    PopupMenu1: TPopupMenu;
+    Windows1: TMenuItem;
+    Exit1: TMenuItem;
+    SelectRegion1: TMenuItem;
+    ClickThrough1: TMenuItem;
+    Opacity1: TMenuItem;
+    Fullscreen1: TMenuItem;
+    Settings1: TMenuItem;
+    N1: TMenuItem;
+    About1: TMenuItem;
+    Exit2: TMenuItem;
+    N1001: TMenuItem;
+    N901: TMenuItem;
+    N801: TMenuItem;
+    N701: TMenuItem;
+    N601: TMenuItem;
+    N501: TMenuItem;
+    N401: TMenuItem;
+    N301: TMenuItem;
+    N201: TMenuItem;
+    N101: TMenuItem;
+    none1: TMenuItem;
+    ImageList1: TImageList;
     procedure FormDblClick(Sender: TObject);
     procedure tmrFSMouseTimer(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -19,6 +42,7 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure FormDestroy(Sender: TObject);
     procedure Exit1Click(Sender: TObject);
+    procedure Exit2Click(Sender: TObject);
   private
     { Private declarations }
     fFullScreenState: Boolean;
@@ -45,17 +69,32 @@ begin
   Close
 end;
 
+procedure TForm1.Exit2Click(Sender: TObject);
+begin
+  Close;
+end;
+
 procedure TForm1.FormCreate(Sender: TObject);
+var
+  I: Integer;
+  AItem: TMenuItem;
 begin
   tmrFSMouse.Enabled := False;
   ThemeManager.ThemeType := TUThemeType.ttDark;
 
   BorderIcons := [];
   DoubleBuffered := True;
-  fPopupMenu := TUPopupMenu.TPopupMenu.Create(Self);
-  fPopupMenu.PopupMode := pmCustom;
-  fPopupMenu.PopupForm := Self;
-  PopupMenu := fPopupMenu;
+//  fPopupMenu := TUPopupMenu.TPopupMenu.Create(Self);
+//  fPopupMenu.PopupMode := pmCustom;
+//  fPopupMenu.PopupForm := Self;
+//  fPopupMenu.Items.Clear;
+//  for I := 0 to PopupMenu1.Items.Count - 1 do
+//  begin
+//    AItem := TMenuItem.Create(PopupMenu1.Items[I]);
+//    AItem.Caption := PopupMenu1.Items[I].Caption;
+//    fPopupMenu.Items.Add(AItem);
+//  end;
+//  PopupMenu := fPopupMenu;
   FormStyle := fsStayOnTop;
 end;
 

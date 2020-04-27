@@ -24,15 +24,10 @@ type
   end;
 
 type
-  TMenuItem = class(Vcl.Menus.TMenuItem)
-  end;
+//  TMenuItem = class(Vcl.Menus.TMenuItem)
+//  end;
   TPopupForm = class(TUForm)
     UScrollBox1: TUScrollBox;
-    UListButton1: TUListButton;
-    UListButton2: TUListButton;
-    UListButton3: TUListButton;
-    UListButton4: TUListButton;
-    UListButton5: TUListButton;
   private
     { Private declarations }
     FPopupForm: TUForm;
@@ -62,30 +57,51 @@ begin
 end;
 
 procedure TPopupMenu.Popup(X, Y: Integer);
+var
+  I: Integer;
+  AForm: TPopupForm;
+  AItem: TUListButton;
 begin
   case FPopupMode of
     pmCustom:
-    with TPopupForm.Create(nil, FPopupForm, Self, FPopupCount) do
     begin
-      FMonitor := Screen.MonitorFromWindow(GetParentHandle);
-      Top := Y;
-      Left := X;
-      Width := 180;
-      Height := 200;
-      if FMonitor.Top > Top then
-        Top := FMonitor.Top;
-      if FMonitor.Left > Left then
-        Left := FMonitor.Left;
-      if FMonitor.BoundsRect.Bottom < (Top+Height) then
-        Top := FMonitor.BoundsRect.Bottom - Height;
-      if FMonitor.BoundsRect.Right < (Left+Width) then
-        Left := FMonitor.BoundsRect.Right - Width;
-      BorderIcons := [];
-      DoubleBuffered := True;
-      FormStyle := fsStayOnTop;
-      BorderStyle := bsDialog;
-      ThemeManager.ThemeType := ttDark;
-      Show;
+      AForm := TPopupForm.Create(nil, FPopupForm, Self, FPopupCount);
+      with AForm do
+      begin
+        FMonitor := Screen.MonitorFromWindow(GetParentHandle);
+        Top := Y;
+        Left := X;
+        Width := 180;
+        Height := 200;
+        if FMonitor.Top > Top then
+          Top := FMonitor.Top;
+        if FMonitor.Left > Left then
+          Left := FMonitor.Left;
+        if FMonitor.BoundsRect.Bottom < (Top+Height) then
+          Top := FMonitor.BoundsRect.Bottom - Height;
+        if FMonitor.BoundsRect.Right < (Left+Width) then
+          Left := FMonitor.BoundsRect.Right - Width;
+        BorderIcons := [];
+        DoubleBuffered := True;
+        FormStyle := fsStayOnTop;
+        BorderStyle := bsDialog;
+        ThemeManager.ThemeType := ttDark;
+        Show;
+
+        for I := Items.Count - 1 downto 0 do
+        begin
+          AItem := TUListButton.Create(nil);
+          with AItem do
+          begin
+            Align := alTop;
+            Detail := '';
+            ImageIndex := I;
+            FontIcon := '';
+            Caption := Items[I].Caption;
+            Parent := AForm.UScrollBox1;
+          end;
+        end;
+      end;
     end;
     pmStandard: inherited;
   end;
