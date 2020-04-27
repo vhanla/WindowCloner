@@ -22,6 +22,27 @@ object Form1: TForm1
   OnResize = FormResize
   PixelsPerInch = 96
   TextHeight = 13
+  object lblGuide: TLabel
+    Left = 0
+    Top = 0
+    Width = 430
+    Height = 238
+    Align = alClient
+    Alignment = taCenter
+    Caption = 'Pick a window'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    Font.Quality = fqClearTypeNatural
+    ParentFont = False
+    Layout = tlCenter
+    OnDblClick = FormDblClick
+    OnMouseDown = FormMouseDown
+    ExplicitWidth = 66
+    ExplicitHeight = 13
+  end
   object tmrFSMouse: TTimer
     Interval = 100
     OnTimer = tmrFSMouseTimer

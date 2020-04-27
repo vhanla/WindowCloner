@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, UCL.Form, Vcl.ExtCtrls, UCL.ThemeManager, TUPopupMenu,
   Vcl.Menus, UCL.PopupMenu, System.ImageList, Vcl.ImgList, DWMApi, PsAPI,
-  System.Actions, Vcl.ActnList;
+  System.Actions, Vcl.ActnList, Vcl.StdCtrls;
 
 const
   DWMWA_CLOAKED = 14; // Windows 8 or superior only
@@ -70,6 +70,7 @@ type
     actF11: TAction;
     actF: TAction;
     actAltEnter: TAction;
+    lblGuide: TLabel;
     procedure FormDblClick(Sender: TObject);
     procedure tmrFSMouseTimer(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -480,6 +481,8 @@ var
   LHWindow: HWND;
 begin
   if not IsWindow(AHandle) then Exit;
+
+  lblGuide.Visible := False;
 
   if fThumbWindow <> 0 then
     DwmUnregisterThumbnail(fThumbWindow);
