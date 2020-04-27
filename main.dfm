@@ -52,37 +52,48 @@ object Form1: TForm1
       Caption = 'Opacity'
       object N1001: TMenuItem
         Caption = '100%'
+        OnClick = N1001Click
       end
       object N901: TMenuItem
         Caption = '90%'
+        OnClick = N1001Click
       end
       object N801: TMenuItem
         Caption = '80%'
+        OnClick = N1001Click
       end
       object N701: TMenuItem
         Caption = '70%'
+        OnClick = N1001Click
       end
       object N601: TMenuItem
         Caption = '60%'
+        OnClick = N1001Click
       end
       object N501: TMenuItem
         Caption = '50%'
+        OnClick = N1001Click
       end
       object N401: TMenuItem
         Caption = '40%'
+        OnClick = N1001Click
       end
       object N301: TMenuItem
         Caption = '30%'
+        OnClick = N1001Click
       end
       object N201: TMenuItem
         Caption = '20%'
+        OnClick = N1001Click
       end
       object N101: TMenuItem
         Caption = '10%'
+        OnClick = N1001Click
       end
     end
     object Fullscreen1: TMenuItem
       Caption = 'Fullscreen'
+      OnClick = Fullscreen1Click
     end
     object N1: TMenuItem
       Caption = '-'

@@ -43,6 +43,8 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure Exit1Click(Sender: TObject);
     procedure Exit2Click(Sender: TObject);
+    procedure Fullscreen1Click(Sender: TObject);
+    procedure N1001Click(Sender: TObject);
   private
     { Private declarations }
     fFullScreenState: Boolean;
@@ -51,6 +53,7 @@ type
     fPrevFSCursor: TPoint;
     fPopupMenu: TUPopupMenu.TPopupMenu;
     procedure SetFullScreen(Enabled: Boolean);
+    procedure SetOpacity(Sender: TObject);
   public
     { Public declarations }
   published
@@ -96,6 +99,10 @@ begin
 //  end;
 //  PopupMenu := fPopupMenu;
   FormStyle := fsStayOnTop;
+
+  SetWindowLong(Handle, GWL_EXSTYLE, GetWindowLong(Handle, GWL_EXSTYLE) or WS_EX_LAYERED);
+
+  SetLayeredWindowAttributes(Handle, 0, 255, LWA_ALPHA);
 end;
 
 procedure TForm1.FormDblClick(Sender: TObject);
@@ -125,6 +132,18 @@ begin
     ShowCursor(True);
 end;
 
+procedure TForm1.Fullscreen1Click(Sender: TObject);
+begin
+  FullScreen := not FullScreen;
+
+  Fullscreen1.Checked := FullScreen;
+end;
+
+procedure TForm1.N1001Click(Sender: TObject);
+begin
+  SetOpacity(Sender);
+end;
+
 procedure TForm1.SetFullScreen(Enabled: Boolean);
 begin
   fFullScreenState := Enabled;
@@ -151,6 +170,27 @@ begin
     BorderStyle := fPrevStyle;
     tmrFSMouse.Enabled := False;
     ShowCursor(True);
+  end;
+end;
+
+// Reads opacity level from MenuItem name e.g. "40%"
+procedure TForm1.SetOpacity(Sender: TObject);
+var
+  FOpacity: String;
+  IOpacity: Integer;
+  I: Integer;
+begin
+  if Sender is TMenuItem then
+  begin
+    for I := 0 to Opacity1.Count - 1 do
+      Opacity1.Items[I].Checked := False;
+    FOpacity := StringReplace(TMenuItem(Sender).Caption,'%','',[rfReplaceAll]);
+    FOpacity := StringReplace(FOpacity,'&','',[rfReplaceAll]);
+    IOpacity := StrToInt(FOpacity);
+//    TMenuItem(FindComponent('N'+FOpacity+'1')).Checked := True;
+    IOpacity := Round(IOpacity/100*255);
+    SetLayeredWindowAttributes(Handle, 0, IOpacity, LWA_ALPHA);
+    TMenuItem(Sender).Checked := True;
   end;
 end;
 
