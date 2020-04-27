@@ -17,6 +17,7 @@ object Form1: TForm1
   OnDestroy = FormDestroy
   OnMouseDown = FormMouseDown
   OnMouseMove = FormMouseMove
+  OnResize = FormResize
   PixelsPerInch = 96
   TextHeight = 13
   object tmrFSMouse: TTimer
@@ -31,16 +32,16 @@ object Form1: TForm1
     Top = 104
   end
   object PopupMenu1: TPopupMenu
+    Images = imglstIcons
+    OnPopup = PopupMenu1Popup
     Left = 312
     Top = 80
-    object Windows1: TMenuItem
+    object ListWindows1: TMenuItem
       Caption = 'Pick Window'
-      object none1: TMenuItem
-        Caption = '<none>'
-      end
     end
-    object Exit1: TMenuItem
+    object mnuSwitchToWindow: TMenuItem
       Caption = 'Switch to Window'
+      OnClick = mnuSwitchToWindowClick
     end
     object SelectRegion1: TMenuItem
       Caption = 'Select Region'
@@ -109,8 +110,27 @@ object Form1: TForm1
       OnClick = Exit2Click
     end
   end
-  object ImageList1: TImageList
+  object imglstIcons: TImageList
     Left = 72
     Top = 128
+  end
+  object ActionList1: TActionList
+    Left = 56
+    Top = 48
+    object actF11: TAction
+      Caption = 'actF11'
+      ShortCut = 122
+      OnExecute = Fullscreen1Click
+    end
+    object actF: TAction
+      Caption = 'actF'
+      ShortCut = 70
+      OnExecute = Fullscreen1Click
+    end
+    object actAltEnter: TAction
+      Caption = 'actAltEnter'
+      ShortCut = 32781
+      OnExecute = Fullscreen1Click
+    end
   end
 end
