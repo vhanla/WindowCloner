@@ -128,6 +128,10 @@ object Form1: TForm1
       Caption = 'Borderless'
       OnClick = Borderless1Click
     end
+    object HidefromTaskbar1: TMenuItem
+      Caption = 'Hide from Taskbar'
+      OnClick = HidefromTaskbar1Click
+    end
     object N1: TMenuItem
       Caption = '-'
     end

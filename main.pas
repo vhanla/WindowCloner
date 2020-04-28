@@ -72,6 +72,7 @@ type
     actAltEnter: TAction;
     lblGuide: TLabel;
     Borderless1: TMenuItem;
+    HidefromTaskbar1: TMenuItem;
     procedure FormDblClick(Sender: TObject);
     procedure tmrFSMouseTimer(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -94,6 +95,7 @@ type
     procedure TrayIcon1MouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure Borderless1Click(Sender: TObject);
+    procedure HidefromTaskbar1Click(Sender: TObject);
   private
     { Private declarations }
     fFullScreenState: Boolean;
@@ -284,6 +286,21 @@ procedure TForm1.HandleWindowListClick(Sender: TObject);
 begin
   fCurrentWindow := TMenuItem(Sender).Tag;
   SetWindowClone(fCurrentWindow, arNormal);
+end;
+
+procedure TForm1.HidefromTaskbar1Click(Sender: TObject);
+begin
+  TMenuItem(Sender).Checked := not TMenuItem(Sender).Checked;
+  if TMenuItem(Sender).Checked then
+  begin
+    Application.MainFormOnTaskBar := False;
+    ShowWindow(Application.Handle, SW_HIDE);
+  end
+  else
+  begin
+    Application.MainFormOnTaskBar := True;
+    ShowWindow(Application.Handle, SW_SHOWNORMAL);
+  end;
 end;
 
 // Lists windows and also updates TMenuItem holding them
