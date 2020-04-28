@@ -38,5 +38,5 @@ These are planned features, some might change or disappear, it is only a plan.
 
 ### Hint
 
-- Setting Hide from taskbar + follow cursor + Clickthrough it will make it hide from Alt-Tab 
+- Setting Hide from taskbar + follow cursor it will make it hide from Alt-Tab 
 
