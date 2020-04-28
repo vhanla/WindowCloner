@@ -133,6 +133,10 @@ object Form1: TForm1
       Caption = 'Hide from Taskbar'
       OnClick = HidefromTaskbar1Click
     end
+    object MouseCursorMode1: TMenuItem
+      Caption = 'Mouse Cursor Mode'
+      OnClick = MouseCursorMode1Click
+    end
     object N1: TMenuItem
       Caption = '-'
     end
@@ -179,5 +183,12 @@ object Form1: TForm1
       ShortCut = 77
       OnExecute = actMuteToggleExecute
     end
+  end
+  object tmrMouseCursorMode: TTimer
+    Enabled = False
+    Interval = 75
+    OnTimer = tmrMouseCursorModeTimer
+    Left = 256
+    Top = 176
   end
 end

@@ -97,6 +97,8 @@ type
     Borderless1: TMenuItem;
     HidefromTaskbar1: TMenuItem;
     actMuteToggle: TAction;
+    MouseCursorMode1: TMenuItem;
+    tmrMouseCursorMode: TTimer;
     procedure FormDblClick(Sender: TObject);
     procedure tmrFSMouseTimer(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -122,6 +124,8 @@ type
     procedure HidefromTaskbar1Click(Sender: TObject);
     procedure actMuteToggleExecute(Sender: TObject);
     procedure About1Click(Sender: TObject);
+    procedure MouseCursorMode1Click(Sender: TObject);
+    procedure tmrMouseCursorModeTimer(Sender: TObject);
   private
     { Private declarations }
     fFullScreenState: Boolean;
@@ -173,6 +177,12 @@ procedure TForm1.mnuSwitchToWindowClick(Sender: TObject);
 begin
   if fCurrentWindow <> 0 then
     SwitchToThisWindow(fCurrentWindow, True);
+end;
+
+procedure TForm1.MouseCursorMode1Click(Sender: TObject);
+begin
+  MouseCursorMode1.Checked := not MouseCursorMode1.Checked;
+  tmrMouseCursorMode.Enabled := MouseCursorMode1.Checked;
 end;
 
 procedure TForm1.About1Click(Sender: TObject);
@@ -653,6 +663,26 @@ begin
     end;
 
   end;
+end;
+
+procedure TForm1.tmrMouseCursorModeTimer(Sender: TObject);
+const GAP = 10;
+var
+  fPoint: TPoint;
+begin
+  if FullScreen then Exit;
+  
+  if (GetAsyncKeyState(VK_CONTROL)<>0)
+  and ((GetAsyncKeyState(VK_LSHIFT)<>0) or (GetAsyncKeyState(VK_RSHIFT)<>0))
+  and (GetAsyncKeyState(VK_MENU)<>0)
+  then Exit;
+
+
+  if not Winapi.Windows.GetCursorPos(fPoint) then
+    fPoint := Point(110, 110);
+
+  Left := fPoint.X + GAP;
+  Top := fPoint.Y + GAP;
 end;
 
 procedure TForm1.tmrFSMouseTimer(Sender: TObject);
