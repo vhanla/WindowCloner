@@ -168,5 +168,10 @@ object Form1: TForm1
       ShortCut = 32781
       OnExecute = Fullscreen1Click
     end
+    object actMuteToggle: TAction
+      Caption = 'actMuteToggle'
+      ShortCut = 77
+      OnExecute = actMuteToggleExecute
+    end
   end
 end
