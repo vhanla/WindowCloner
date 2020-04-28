@@ -67,6 +67,7 @@
         <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+        <Icon_MainIcon>Icon.ico</Icon_MainIcon>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win64)'!=''">
         <DCC_UsePackage>DBXSqliteDriver;bindcompdbx;IndyIPCommon;RESTComponents;DBXInterBaseDriver;vcl;IndyIPServer;vclactnband;OmniThreadLibraryRuntime;vclFireDAC;IndySystem;tethering;dsnapcon;FireDACADSDriver;VirtualTreesR;DzDirSeek;FireDACMSAccDriver;fmxFireDAC;vclimg;FireDAC;vcltouch;DragDropDR103R;vcldb;bindcompfmx;FireDACSqliteDriver;FireDACPgDriver;inetdb;DScintillaRuntime;soaprtl;DbxCommonDriver;FireDACIBDriver;fmx;fmxdae;xmlrtl;soapmidas;fmxobj;vclwinx;rtl;DbxClientDriver;CustomIPTransport;vcldsnap;dbexpress;IndyCore;DOSCommandDR;vclx;bindcomp;appanalytics;dsnap;EsVclCore;FireDACCommon;IndyIPClient;bindcompvcl;SynEdit_R;RESTBackendComponents;VCLRESTComponents;BCEditor.Package;soapserver;dbxcds;VclSmp;adortl;vclie;bindengine;DBXMySQLDriver;CloudService;dsnapxml;FireDACMySQLDriver;dbrtl;inetdbxpress;IndyProtocols;EsVclComponents;FireDACCommonODBC;FireDACCommonDriver;RKAIOXE4U1;inet;fmxase;$(DCC_UsePackage)</DCC_UsePackage>
@@ -83,6 +84,8 @@
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <VerInfo_Locale>1033</VerInfo_Locale>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
@@ -125,6 +128,10 @@
                 <Source>
                     <Source Name="MainSource">WindowCloner.dpr</Source>
                 </Source>
+                <Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k260.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp260.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+                </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="3">
                 <DeployFile LocalName="Win32\Debug\WindowCloner.exe" Configuration="Debug" Class="ProjectOutput">

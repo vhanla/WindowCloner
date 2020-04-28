@@ -1,7 +1,7 @@
 object Form1: TForm1
   Left = 0
   Top = 0
-  Caption = 'Form1'
+  Caption = 'Window Cloner'
   ClientHeight = 238
   ClientWidth = 430
   Color = clBtnFace
@@ -38,6 +38,7 @@ object Form1: TForm1
     Font.Style = []
     Font.Quality = fqClearTypeNatural
     ParentFont = False
+    PopupMenu = PopupMenu1
     Layout = tlCenter
     OnDblClick = FormDblClick
     OnMouseDown = FormMouseDown
@@ -51,7 +52,9 @@ object Form1: TForm1
     Top = 72
   end
   object TrayIcon1: TTrayIcon
+    Icons = imglstIcons
     Visible = True
+    OnMouseUp = TrayIcon1MouseUp
     Left = 216
     Top = 104
   end
@@ -120,6 +123,10 @@ object Form1: TForm1
     object Fullscreen1: TMenuItem
       Caption = 'Fullscreen'
       OnClick = Fullscreen1Click
+    end
+    object Borderless1: TMenuItem
+      Caption = 'Borderless'
+      OnClick = Borderless1Click
     end
     object N1: TMenuItem
       Caption = '-'

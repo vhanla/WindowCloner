@@ -71,6 +71,7 @@ type
     actF: TAction;
     actAltEnter: TAction;
     lblGuide: TLabel;
+    Borderless1: TMenuItem;
     procedure FormDblClick(Sender: TObject);
     procedure tmrFSMouseTimer(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -90,12 +91,15 @@ type
       MousePos: TPoint; var Handled: Boolean);
     procedure ClickThrough1Click(Sender: TObject);
     procedure FormActivate(Sender: TObject);
+    procedure TrayIcon1MouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure Borderless1Click(Sender: TObject);
   private
     { Private declarations }
     fFullScreenState: Boolean;
     fClickThrough: Boolean;
     fPrevRect: TRect;
-    fPrevStyle: TBorderStyle;
+    fBorderStyle: TBorderStyle;
     fPrevFSCursor: TPoint;
     fPopupMenu: TUPopupMenu.TPopupMenu;
     fListApps: TListApp;
@@ -132,9 +136,21 @@ begin
     SwitchToThisWindow(fCurrentWindow, True);
 end;
 
+procedure TForm1.Borderless1Click(Sender: TObject);
+begin
+  if FullScreen then Exit;
+
+  TMenuItem(Sender).Checked := not TMenuItem(Sender).Checked;
+  if TMenuItem(Sender).Checked then
+    BorderStyle := bsNone
+  else
+    BorderStyle := fBorderStyle;
+end;
+
 procedure TForm1.ClickThrough1Click(Sender: TObject);
 begin
   ClickThrough := not ClickThrough;
+  ClickThrough1.Checked := ClickThrough;
 end;
 
 procedure TForm1.Exit2Click(Sender: TObject);
@@ -145,6 +161,7 @@ end;
 procedure TForm1.FormActivate(Sender: TObject);
 begin
   ClickThrough := False;
+  ClickThrough1.Checked := False;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -156,6 +173,7 @@ begin
   ThemeManager.ThemeType := TUThemeType.ttDark;
 
   BorderIcons := [];
+  fBorderStyle := BorderStyle;
   DoubleBuffered := True;
 //  fPopupMenu := TUPopupMenu.TPopupMenu.Create(Self);
 //  fPopupMenu.PopupMode := pmCustom;
@@ -468,7 +486,6 @@ begin
     Top := Screen.Monitors[0].Top;
     ClientWidth := Screen.Monitors[0].Width;
     ClientHeight := Screen.Monitors[0].Height;
-    fPrevStyle := BorderStyle;
     BorderStyle := bsNone;
     tmrFSMouse.Enabled := True;
   end
@@ -478,7 +495,8 @@ begin
     Top := fPrevRect.Top;
     ClientWidth := fPrevRect.Width;
     ClientHeight := fPrevRect.Height;
-    BorderStyle := fPrevStyle;
+    if not Borderless1.Checked then
+      BorderStyle := fBorderStyle;
     tmrFSMouse.Enabled := False;
     ShowCursor(True);
   end;
@@ -558,6 +576,13 @@ begin
     fPrevFSCursor := Mouse.CursorPos;
   end
   else ShowCursor(True);
+end;
+
+procedure TForm1.TrayIcon1MouseUp(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  if Button = mbRight then
+    PopupMenu1.Popup(Mouse.CursorPos.X, Mouse.CursorPos.Y);
 end;
 
 { TListApp }
