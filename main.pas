@@ -140,6 +140,7 @@ type
     fThumbWindow: HTHUMBNAIL;
     fCurrentWindow: HWND;
     fCurrentExecutable: String;
+    fDefaultExStyle: Integer;
     fListAudioSessions: TListAudioSession;
     procedure SetFullScreen(Enabled: Boolean);
     procedure SetClickThrough(Enabled: Boolean);
@@ -385,6 +386,7 @@ begin
   TMenuItem(Sender).Checked := not TMenuItem(Sender).Checked;
   if TMenuItem(Sender).Checked then
   begin
+    fDefaultExStyle := GetWindowLong(Handle, GWL_EXSTYLE);
     Application.MainFormOnTaskBar := False;
     ShowWindow(Application.Handle, SW_HIDE);
   end
@@ -392,7 +394,10 @@ begin
   begin
     Application.MainFormOnTaskBar := True;
     ShowWindow(Application.Handle, SW_SHOWNORMAL);
+    SetWindowLong(Handle,GWL_EXSTYLE, fDefaultExStyle);
   end;
+  ClickThrough1.Enabled := not HidefromTaskbar1.Checked;
+  Opacity1.Enabled := not HidefromTaskbar1.Checked;
 end;
 
 // Lists windows and also updates TMenuItem holding them
