@@ -9,6 +9,9 @@ uses
   System.Actions, Vcl.ActnList, Vcl.StdCtrls, ShellApi;
 
 const
+  WM_MOUSE_EVENT = WM_USER + 9;
+  MOUSE_GAP_X = 10;
+  MOUSE_GAP_Y = 14;
   DWMWA_CLOAKED = 14; // Windows 8 or superior only
   DWM_NOT_CLOAKED = 0; // i.e. Visible for real
   DWM_CLOAKED_APP = 1;
@@ -98,7 +101,6 @@ type
     HidefromTaskbar1: TMenuItem;
     actMuteToggle: TAction;
     MouseCursorMode1: TMenuItem;
-    tmrMouseCursorMode: TTimer;
     procedure FormDblClick(Sender: TObject);
     procedure tmrFSMouseTimer(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -125,7 +127,6 @@ type
     procedure actMuteToggleExecute(Sender: TObject);
     procedure About1Click(Sender: TObject);
     procedure MouseCursorMode1Click(Sender: TObject);
-    procedure tmrMouseCursorModeTimer(Sender: TObject);
   private
     { Private declarations }
     fFullScreenState: Boolean;
@@ -149,6 +150,9 @@ type
     procedure ListWindows(var Menu: TMenuItem);
     procedure HandleWindowListClick(Sender: TObject);
     procedure SetWindowClone(AHandle: THandle; AspectRatio: TAspectRatio);
+  protected
+    procedure MouseEvent(var Msg: TMessage); message WM_MOUSE_EVENT;
+    procedure CreateParams(var Params: TCreateParams); override;
   public
     { Public declarations }
   published
@@ -171,6 +175,8 @@ function SetAudioSessionVolume(sessionId: LongWord; volume: Single): Integer; st
   external 'AudioHelper.dll' name 'SetAudioSessionVolume';
 function SetAudioSessionMute(sessionId: LongWord; isMuted: boolean): Integer; stdcall;
   external 'AudioHelper.dll' name 'SetAudioSessionMute';
+procedure RunHook(AHandle: HWND);cdecl;external 'MouseHook.dll' name 'RunHook';
+procedure KillHook;cdecl;external 'MouseHook.dll' name 'KillHook';
 implementation
 
 {$R *.dfm}
@@ -184,7 +190,6 @@ end;
 procedure TForm1.MouseCursorMode1Click(Sender: TObject);
 begin
   MouseCursorMode1.Checked := not MouseCursorMode1.Checked;
-  tmrMouseCursorMode.Enabled := MouseCursorMode1.Checked;
   // hides from alt-tab if it is hidden from taskbar
   if HidefromTaskbar1.Checked then
     SetWindowLong(Handle, GWL_EXSTYLE, GetWindowLong(Handle, GWL_EXSTYLE) or WS_EX_TOOLWINDOW);
@@ -246,6 +251,13 @@ begin
   ClickThrough1.Checked := ClickThrough;
 end;
 
+procedure TForm1.CreateParams(var Params: TCreateParams);
+begin
+  inherited CreateParams(Params);
+
+  Params.WinClassName := 'WindowClonerHwnd';
+end;
+
 procedure TForm1.Exit2Click(Sender: TObject);
 begin
   Close;
@@ -262,6 +274,7 @@ var
   I: Integer;
   AItem: TMenuItem;
 begin
+  RunHook(Handle);
   tmrFSMouse.Enabled := False;
   ThemeManager.ThemeType := TUThemeType.ttDark;
 
@@ -307,6 +320,7 @@ begin
   fListAudioSessions.Free;
   fListApps.Free;
   fPopupMenu.Free;
+  KillHook;
 end;
 
 procedure TForm1.FormMouseDown(Sender: TObject; Button: TMouseButton;
@@ -387,8 +401,11 @@ begin
   SetWindowClone(fCurrentWindow, arNormal);
 end;
 
+// We need to rehook since window handle recreates it with new one
 procedure TForm1.HidefromTaskbar1Click(Sender: TObject);
 begin
+  KillHook;
+
   TMenuItem(Sender).Checked := not TMenuItem(Sender).Checked;
   if TMenuItem(Sender).Checked then
   begin
@@ -404,6 +421,8 @@ begin
   end;
   ClickThrough1.Enabled := not HidefromTaskbar1.Checked;
   Opacity1.Enabled := not HidefromTaskbar1.Checked;
+
+  RunHook(Handle);
 end;
 
 // Lists windows and also updates TMenuItem holding them
@@ -676,26 +695,6 @@ begin
   end;
 end;
 
-procedure TForm1.tmrMouseCursorModeTimer(Sender: TObject);
-const GAP = 10;
-var
-  fPoint: TPoint;
-begin
-  if FullScreen then Exit;
-  
-  if (GetAsyncKeyState(VK_CONTROL)<>0)
-  and ((GetAsyncKeyState(VK_LSHIFT)<>0) or (GetAsyncKeyState(VK_RSHIFT)<>0))
-  and (GetAsyncKeyState(VK_MENU)<>0)
-  then Exit;
-
-
-  if not Winapi.Windows.GetCursorPos(fPoint) then
-    fPoint := Point(110, 110);
-
-  Left := fPoint.X + GAP;
-  Top := fPoint.Y + GAP;
-end;
-
 procedure TForm1.tmrFSMouseTimer(Sender: TObject);
 begin
   if FullScreen then
@@ -720,6 +719,34 @@ procedure TForm1.TrayIcon1MouseUp(Sender: TObject; Button: TMouseButton;
 begin
   if Button = mbRight then
     PopupMenu1.Popup(Mouse.CursorPos.X, Mouse.CursorPos.Y);
+end;
+
+procedure TForm1.MouseEvent(var Msg: TMessage);
+var
+  FMsg: PCopyDataStruct;
+  Data: PMouseHookStruct;
+begin
+
+  if not MouseCursorMode1.Checked then Exit;
+  if Fullscreen then Exit;
+  if (GetAsyncKeyState(VK_CONTROL)<>0)
+  and ((GetAsyncKeyState(VK_LSHIFT)<>0) or (GetAsyncKeyState(VK_RSHIFT)<>0))
+  and (GetAsyncKeyState(VK_MENU)<>0)
+  then Exit;
+
+
+
+  Msg.Result := 0;
+  FMsg := PCopyDataStruct(Msg.LParam);
+  if FMsg = nil then
+    Exit;
+
+  Data := PMouseHookStruct(FMsg.lpData);
+
+  Left := Data^.pt.X + MOUSE_GAP_X;
+  Top := Data^.pt.Y + MOUSE_GAP_Y;
+
+  Msg.Result := 1;
 end;
 
 { TListApp }

@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{760B1C2F-14B3-4FBD-A046-7D5A3056BC89}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="WindowCloner.dproj">
+            <Dependencies>MouseHook.dproj</Dependencies>
+        </Projects>
+        <Projects Include="MouseHook.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="WindowCloner" DependsOnTargets="MouseHook">
+        <MSBuild Projects="WindowCloner.dproj"/>
+    </Target>
+    <Target Name="WindowCloner:Clean" DependsOnTargets="MouseHook:Clean">
+        <MSBuild Projects="WindowCloner.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="WindowCloner:Make" DependsOnTargets="MouseHook:Make">
+        <MSBuild Projects="WindowCloner.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="MouseHook">
+        <MSBuild Projects="MouseHook.dproj"/>
+    </Target>
+    <Target Name="MouseHook:Clean">
+        <MSBuild Projects="MouseHook.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="MouseHook:Make">
+        <MSBuild Projects="MouseHook.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="WindowCloner;MouseHook"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="WindowCloner:Clean;MouseHook:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="WindowCloner:Make;MouseHook:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

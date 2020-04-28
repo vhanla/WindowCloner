@@ -184,11 +184,4 @@ object Form1: TForm1
       OnExecute = actMuteToggleExecute
     end
   end
-  object tmrMouseCursorMode: TTimer
-    Enabled = False
-    Interval = 75
-    OnTimer = tmrMouseCursorModeTimer
-    Left = 256
-    Top = 176
-  end
 end
