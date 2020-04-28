@@ -72,6 +72,7 @@ object Form1: TForm1
     end
     object SelectRegion1: TMenuItem
       Caption = 'Select Region'
+      Visible = False
     end
     object ClickThrough1: TMenuItem
       Caption = 'Click Through'
@@ -137,9 +138,11 @@ object Form1: TForm1
     end
     object Settings1: TMenuItem
       Caption = 'Settings'
+      Visible = False
     end
     object About1: TMenuItem
       Caption = 'About'
+      OnClick = About1Click
     end
     object Exit2: TMenuItem
       Caption = 'Exit'
@@ -147,6 +150,7 @@ object Form1: TForm1
     end
   end
   object imglstIcons: TImageList
+    ColorDepth = cd32Bit
     Left = 72
     Top = 128
   end

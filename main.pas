@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, UCL.Form, Vcl.ExtCtrls, UCL.ThemeManager, TUPopupMenu,
   Vcl.Menus, UCL.PopupMenu, System.ImageList, Vcl.ImgList, DWMApi, PsAPI,
-  System.Actions, Vcl.ActnList, Vcl.StdCtrls;
+  System.Actions, Vcl.ActnList, Vcl.StdCtrls, ShellApi;
 
 const
   DWMWA_CLOAKED = 14; // Windows 8 or superior only
@@ -121,6 +121,7 @@ type
     procedure Borderless1Click(Sender: TObject);
     procedure HidefromTaskbar1Click(Sender: TObject);
     procedure actMuteToggleExecute(Sender: TObject);
+    procedure About1Click(Sender: TObject);
   private
     { Private declarations }
     fFullScreenState: Boolean;
@@ -172,6 +173,11 @@ procedure TForm1.mnuSwitchToWindowClick(Sender: TObject);
 begin
   if fCurrentWindow <> 0 then
     SwitchToThisWindow(fCurrentWindow, True);
+end;
+
+procedure TForm1.About1Click(Sender: TObject);
+begin
+  MessageDlg('WindowCloner v1.0'#13#10#13#10'Author: vhanla'#13#10'https://github.com/vhanla/WindowCloner',mtInformation,[mbOK],0);
 end;
 
 procedure TForm1.actMuteToggleExecute(Sender: TObject);
@@ -407,6 +413,8 @@ var
 
    fIcon: HICON;
    aIcon: TIcon;
+   lpsfi: SHFILEINFO;
+   fIconIndex: WORD;
 begin
   I := GetTickCount64;
 
@@ -478,31 +486,27 @@ begin
             end;
 
             // get icon
-            SendMessageTimeout(LHWindow, WM_GETICON, ICON_SMALL2, 0, SMTO_ABORTIFHUNG or SMTO_BLOCK, 500, DWORD(fIcon));
-            if fIcon = 0 then
-            begin
-              fIcon := HICON(GetClassLong(LHWindow, GCL_HICONSM));
-              if fIcon = 0 then
+            ZeroMemory(@lpsfi, SizeOf(SHFILEINFO));
+            SHGetFileInfo(PChar(WinFileName),FILE_ATTRIBUTE_NORMAL,
+              lpsfi, SizeOf(SHFILEINFO), SHGFI_ICON or SHGFI_LARGEICON);
+
+            aIcon := TIcon.Create;
+            try
+              aIcon.Handle := GetClassLong(LHWindow, GCL_HICON);
+              if aIcon.Handle = 0 then
+                aIcon.Handle := GetClassLong(LHWindow, GCL_HICONSM);
+                  if aIcon.Handle = 0 then
+                    aIcon.Handle := lpsfi.hIcon;
+                      if aIcon.Handle = 0 then
+                        aIcon.Handle := ExtractAssociatedIcon(HInstance, PChar(WinFileName),fIconIndex);
+              if aIcon.Handle <> 0 then
               begin
-                fIcon := HICON(GetClassLong(LHWindow, GCL_HICON));
-                if fIcon = 0 then
-                begin
-                  SendMessageTimeout(LHWindow, WM_QUERYDRAGICON, 0, 0, 0, 500, DWORD(fIcon));
-                  if fIcon <> 0 then
-                  begin
-                    aIcon := TIcon.Create;
-                    try
-                      aIcon.Handle := fIcon;
-                      imglstIcons.AddIcon(aIcon);
-                    finally
-                      aIcon.Free;
-                    end;
-                  end;
-
-                end;
+                imglstIcons.AddIcon(aIcon);
               end;
-            end;
 
+            finally
+              aIcon.Free;
+            end;
           finally
             CloseHandle(hProcess);
           end;
@@ -525,7 +529,6 @@ begin
   // Add menu items
   fMenuesCount := fListApps.Count;
   GetMem(fMenues, fMenuesCount * SizeOf(TMenuItem));
-  imglstIcons.Clear;
 
   for I := 0 to fListApps.Count - 1 do
   begin
