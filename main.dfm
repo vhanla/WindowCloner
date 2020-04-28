@@ -52,7 +52,7 @@ object Form1: TForm1
     Top = 72
   end
   object TrayIcon1: TTrayIcon
-    Icons = imglstIcons
+    Hint = 'Window Cloner'
     Visible = True
     OnMouseUp = TrayIcon1MouseUp
     Left = 216

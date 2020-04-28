@@ -140,6 +140,7 @@ type
     fThumbWindow: HTHUMBNAIL;
     fCurrentWindow: HWND;
     fCurrentExecutable: String;
+    fCurrentCaption: String;
     fDefaultExStyle: Integer;
     fListAudioSessions: TListAudioSession;
     procedure SetFullScreen(Enabled: Boolean);
@@ -381,6 +382,8 @@ procedure TForm1.HandleWindowListClick(Sender: TObject);
 begin
   fCurrentWindow := TMenuItem(Sender).Tag;
   fCurrentExecutable := ExtractFileName(fListApps[TMenuItem(Sender).ImageIndex].FilePath);
+  fCurrentCaption := fListApps[TMenuItem(Sender).ImageIndex].Caption;
+  TrayIcon1.Hint := 'Window Cloner - ' + Copy(fCurrentCaption, 1, 64) + '...';
   SetWindowClone(fCurrentWindow, arNormal);
 end;
 
