@@ -184,6 +184,9 @@ procedure TForm1.MouseCursorMode1Click(Sender: TObject);
 begin
   MouseCursorMode1.Checked := not MouseCursorMode1.Checked;
   tmrMouseCursorMode.Enabled := MouseCursorMode1.Checked;
+  // hides from alt-tab if it is hidden from taskbar
+  if HidefromTaskbar1.Checked then
+    SetWindowLong(Handle, GWL_EXSTYLE, GetWindowLong(Handle, GWL_EXSTYLE) or WS_EX_TOOLWINDOW);
 end;
 
 procedure TForm1.About1Click(Sender: TObject);
