@@ -151,6 +151,8 @@ object Form1: TForm1
   end
   object imglstIcons: TImageList
     ColorDepth = cd32Bit
+    Height = 18
+    Width = 18
     Left = 72
     Top = 128
   end

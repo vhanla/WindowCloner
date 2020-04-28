@@ -283,6 +283,8 @@ end;
 procedure TForm1.FormDblClick(Sender: TObject);
 begin
   FullScreen := not FullScreen;
+
+  Fullscreen1.Checked := FullScreen;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
