@@ -34,7 +34,7 @@ These are planned features, some might change or disappear, it is only a plan.
 
 ### Known Issues
 
-- Hiding from taskbar disables clickthrough feature, it needs application restart
+- Hiding from taskbar disables clickthrough and opacity features
 
 ### Hint
 
