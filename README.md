@@ -21,7 +21,8 @@ window, with the following planned features:
 - [ ] Keyboard forwarding
 - [x] Hidden from taskbar, system tray icon
 - [ ] Easy to switch among Picture-In-Picture windows (ctrl-tab)
-- [ ] Hotkeys actions
+- [x] Hotkeys actions
+- [x] Follow mouse cursor
 
 These are planned features, some might change or disappear, it is only a plan.
 
@@ -29,4 +30,13 @@ These are planned features, some might change or disappear, it is only a plan.
 
 - F, F11 or Alt-Enter to toggle FullScreen mode
 - M to mute or unmute if selected window has audio
+- Ctrl-Alt-Shift disables follow mouse cursor while holding them
+
+### Known Issues
+
+- Hiding from taskbar disables clickthrough feature, it needs application restart
+
+### Hint
+
+- Setting Hide from taskbar + follow cursor + Clickthrough it will make it hide from Alt-Tab 
 
