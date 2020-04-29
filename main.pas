@@ -145,6 +145,7 @@ type
     fCurrentCaption: String;
     fDefaultExStyle: Integer;
     fListAudioSessions: TListAudioSession;
+    fCurrentMonitor: TMonitor;
     procedure SetFullScreen(Enabled: Boolean);
     procedure SetClickThrough(Enabled: Boolean);
     procedure SetOpacity(Sender: TObject);
@@ -154,6 +155,7 @@ type
   protected
     procedure MouseEvent(var Msg: TMessage); message WM_MOUSE_EVENT;
     procedure CreateParams(var Params: TCreateParams); override;
+    procedure WM_WindowPosChanged(var Msg: TWMWindowPosChanged);message WM_WINDOWPOSCHANGED;
   public
     { Public declarations }
   published
@@ -623,14 +625,15 @@ begin
   fFullScreenState := Enabled;
   if Enabled then
   begin
+    fCurrentMonitor := Screen.MonitorFromWindow(Handle);
     fPrevRect.Top := Top;
     fPrevRect.Left := Left;
     fPrevRect.Width := Width;
     fPrevRect.Height := Height;
-    Left := Screen.Monitors[0].Left;
-    Top := Screen.Monitors[0].Top;
-    ClientWidth := Screen.Monitors[0].Width;
-    ClientHeight := Screen.Monitors[0].Height;
+    Left := fCurrentMonitor.Left;
+    Top := fCurrentMonitor.Top;
+    ClientWidth := fCurrentMonitor.Width;
+    ClientHeight := fCurrentMonitor.Height;
     BorderStyle := bsNone;
     tmrFSMouse.Enabled := True;
   end
@@ -728,6 +731,20 @@ procedure TForm1.TrayIcon1MouseUp(Sender: TObject; Button: TMouseButton;
 begin
   if Button = mbRight then
     PopupMenu1.Popup(Mouse.CursorPos.X, Mouse.CursorPos.Y);
+end;
+
+// Fix Win+Shift+CursorKey moving on FullScreen
+procedure TForm1.WM_WindowPosChanged(var Msg: TWMWindowPosChanged);
+begin
+  inherited;
+  if fFullScreenState and (fCurrentMonitor <> Screen.MonitorFromWindow(Handle)) then
+  begin
+    fCurrentMonitor := Screen.MonitorFromWindow(Handle);
+    Left := fCurrentMonitor.Left;
+    Top := fCurrentMonitor.Top;
+    ClientWidth := fCurrentMonitor.Width;
+    ClientHeight := fCurrentMonitor.Height;
+  end;
 end;
 
 procedure TForm1.MouseEvent(var Msg: TMessage);
