@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, UCL.Form, Vcl.ExtCtrls, UCL.ThemeManager, TUPopupMenu,
   Vcl.Menus, UCL.PopupMenu, System.ImageList, Vcl.ImgList, DWMApi, PsAPI,
-  System.Actions, Vcl.ActnList, Vcl.StdCtrls, ShellApi;
+  System.Actions, Vcl.ActnList, Vcl.StdCtrls, ShellApi, madExceptVcl;
 
 const
   WM_MOUSE_EVENT = WM_USER + 9;
@@ -101,6 +101,7 @@ type
     HidefromTaskbar1: TMenuItem;
     actMuteToggle: TAction;
     MouseCursorMode1: TMenuItem;
+    MadExceptionHandler1: TMadExceptionHandler;
     procedure FormDblClick(Sender: TObject);
     procedure tmrFSMouseTimer(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -175,8 +176,12 @@ function SetAudioSessionVolume(sessionId: LongWord; volume: Single): Integer; st
   external 'AudioHelper.dll' name 'SetAudioSessionVolume';
 function SetAudioSessionMute(sessionId: LongWord; isMuted: boolean): Integer; stdcall;
   external 'AudioHelper.dll' name 'SetAudioSessionMute';
-procedure RunHook(AHandle: HWND);cdecl;external 'MouseHook.dll' name 'RunHook';
-procedure KillHook;cdecl;external 'MouseHook.dll' name 'KillHook';
+function RunHook(AHandle: HWND):BOOL; stdcall;
+  external 'MouseHook.dll' name 'RunHook';
+function IsHooked:BOOL; stdcall;
+  external 'MouseHook.dll' name 'IsHooked';
+function KillHook:BOOL; stdcall;
+  external 'MouseHook.dll' name 'KillHook';
 implementation
 
 {$R *.dfm}
@@ -274,7 +279,6 @@ var
   I: Integer;
   AItem: TMenuItem;
 begin
-  RunHook(Handle);
   tmrFSMouse.Enabled := False;
   ThemeManager.ThemeType := TUThemeType.ttDark;
 
@@ -306,6 +310,8 @@ begin
   Application.OnActivate := FormActivate;
 
   fListAudioSessions := TListAudioSession.Create;
+
+  RunHook(Handle);
 end;
 
 procedure TForm1.FormDblClick(Sender: TObject);
@@ -320,6 +326,7 @@ begin
   fListAudioSessions.Free;
   fListApps.Free;
   fPopupMenu.Free;
+
   KillHook;
 end;
 
@@ -405,6 +412,7 @@ end;
 procedure TForm1.HidefromTaskbar1Click(Sender: TObject);
 begin
   KillHook;
+  MouseCursorMode1.Checked := False;
 
   TMenuItem(Sender).Checked := not TMenuItem(Sender).Checked;
   if TMenuItem(Sender).Checked then
@@ -422,6 +430,7 @@ begin
   ClickThrough1.Enabled := not HidefromTaskbar1.Checked;
   Opacity1.Enabled := not HidefromTaskbar1.Checked;
 
+  Sleep(500);
   RunHook(Handle);
 end;
 

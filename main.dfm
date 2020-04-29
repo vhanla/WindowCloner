@@ -184,4 +184,8 @@ object Form1: TForm1
       OnExecute = actMuteToggleExecute
     end
   end
+  object MadExceptionHandler1: TMadExceptionHandler
+    Left = 208
+    Top = 192
+  end
 end

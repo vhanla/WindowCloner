@@ -84,18 +84,32 @@ begin
   if MMF <> INVALID_HANDLE_VALUE then CloseHandle(MMF);
 end;
 
-procedure RunHook(AHandle: HWND); stdcall;
+function IsHooked:BOOL; stdcall;
 begin
+  Result := False;
+  if (GlobalData <> nil) and (GlobalData^.HookHandle <> INVALID_HANDLE_VALUE) then
+    Result := True;
+end;
+
+function RunHook(AHandle: HWND):BOOL; stdcall;
+begin
+  Result := False;
   OwnerHandle := AHandle;
   GlobalData^.HookHandle := SetWindowsHookEx(WH_MOUSE_LL, @HookProc, HInstance, 0);
 
   if GlobalData^.HookHandle = INVALID_HANDLE_VALUE then Exit;
+  Result := True;
 end;
 
-procedure KillHook; stdcall;
+function KillHook:BOOL; stdcall;
 begin
+  Result := False;
   if (GlobalData <> nil) and (GlobalData^.HookHandle <> INVALID_HANDLE_VALUE) then
-    UnhookWindowsHookEx(GlobalData^.HookHandle);
+  begin
+    Result := UnhookWindowsHookEx(GlobalData^.HookHandle);
+    if not Result then
+      Result := UnhookWindowsHookEx(GlobalData^.HookHandle);
+  end;
 end;
 
 procedure DLLEntry(dwReason: DWORD);
@@ -108,6 +122,7 @@ end;
 
 exports
   KillHook,
+  IsHooked,
   RunHook;
 
 begin
