@@ -128,6 +128,7 @@ type
     procedure actMuteToggleExecute(Sender: TObject);
     procedure About1Click(Sender: TObject);
     procedure MouseCursorMode1Click(Sender: TObject);
+    procedure SelectRegion1Click(Sender: TObject);
   private
     { Private declarations }
     fFullScreenState: Boolean;
@@ -187,6 +188,8 @@ function KillHook:BOOL; stdcall;
 implementation
 
 {$R *.dfm}
+
+uses frmAreaSelector;
 
 procedure TForm1.mnuSwitchToWindowClick(Sender: TObject);
 begin
@@ -605,6 +608,21 @@ end;
 procedure TForm1.PopupMenu1Popup(Sender: TObject);
 begin
   ListWindows(ListWindows1);
+end;
+
+procedure TForm1.SelectRegion1Click(Sender: TObject);
+var
+  prevBorder: TBorderStyle;
+begin
+  prevBorder := BorderStyle;
+  BorderStyle := bsNone;
+  FormStyle := fsNormal;
+  formAreaSelector.FormStyle := fsStayOnTop;
+  formAreaSelector.BorderStyle := bsNone;
+  formAreaSelector.BoundsRect := BoundsRect;
+  formAreaSelector.ShowModal;
+  FormStyle := fsStayOnTop;
+  BorderStyle := prevBorder;
 end;
 
 procedure TForm1.SetClickThrough(Enabled: Boolean);

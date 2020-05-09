@@ -72,7 +72,7 @@ object Form1: TForm1
     end
     object SelectRegion1: TMenuItem
       Caption = 'Select Region'
-      Visible = False
+      OnClick = SelectRegion1Click
     end
     object ClickThrough1: TMenuItem
       Caption = 'Click Through'
@@ -187,5 +187,15 @@ object Form1: TForm1
   object MadExceptionHandler1: TMadExceptionHandler
     Left = 208
     Top = 192
+  end
+  object Taskbar1: TTaskbar
+    TaskBarButtons = <
+      item
+      end
+      item
+      end>
+    TabProperties = []
+    Left = 304
+    Top = 176
   end
 end
