@@ -6,7 +6,8 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, UCL.Form, Vcl.ExtCtrls, UCL.ThemeManager, TUPopupMenu,
   Vcl.Menus, UCL.PopupMenu, System.ImageList, Vcl.ImgList, DWMApi, PsAPI,
-  System.Actions, Vcl.ActnList, Vcl.StdCtrls, ShellApi, madExceptVcl;
+  System.Actions, Vcl.ActnList, Vcl.StdCtrls, ShellApi, madExceptVcl,
+  System.Win.TaskbarCore, Vcl.Taskbar, Vcl.JumpList;
 
 const
   WM_MOUSE_EVENT = WM_USER + 9;
@@ -102,6 +103,9 @@ type
     actMuteToggle: TAction;
     MouseCursorMode1: TMenuItem;
     MadExceptionHandler1: TMadExceptionHandler;
+    Taskbar1: TTaskbar;
+    JumpList1: TJumpList;
+    actPlayPause: TAction;
     procedure FormDblClick(Sender: TObject);
     procedure tmrFSMouseTimer(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -129,6 +133,7 @@ type
     procedure About1Click(Sender: TObject);
     procedure MouseCursorMode1Click(Sender: TObject);
     procedure SelectRegion1Click(Sender: TObject);
+    procedure actPlayPauseExecute(Sender: TObject);
   private
     { Private declarations }
     fFullScreenState: Boolean;
@@ -208,6 +213,85 @@ end;
 procedure TForm1.About1Click(Sender: TObject);
 begin
   MessageDlg('WindowCloner v1.0'#13#10#13#10'Author: vhanla'#13#10'https://github.com/vhanla/WindowCloner',mtInformation,[mbOK],0);
+end;
+
+procedure TForm1.actPlayPauseExecute(Sender: TObject);
+var
+  oldPoint: TPoint;
+  aRect: TRect;
+  aPoint: TPoint;
+  aInput: array[0..1] of TInput;
+  mouseInputs: array of TInput;
+  KeyInputs: array of TInput;
+  child: THandle;
+  //--------------------------------------------
+  procedure MouseInput(mPoint: TPoint; mFlags: DWORD);
+  begin
+    SetLength(mouseInputs, Length(mouseInputs)+1);
+    mouseInputs[high(mouseInputs)].Itype := INPUT_MOUSE;
+    with mouseInputs[high(mouseInputs)].mi do
+    begin
+//      dx := mPoint.X;
+  //    dy := mPoint.Y;
+      // zero for mouse clicks
+      mouseData := 0; // https://docs.microsoft.com/es-mx/windows/win32/api/winuser/ns-winuser-mouseinput
+      dwFlags := mFlags;
+    end;
+  end;
+
+  procedure KeybdInput(VKey: Byte; Flags: DWORD);
+  begin
+    SetLength(KeyInputs, Length(KeyInputs)+1);
+    KeyInputs[high(KeyInputs)].Itype := INPUT_KEYBOARD;
+    with  KeyInputs[high(KeyInputs)].ki do
+    begin
+      wVk := VKey;
+      wScan := MapVirtualKey(wVk, 0);
+      dwFlags := Flags;
+    end;
+  end;
+begin
+  if IsWindow(fCurrentWindow) then
+  begin
+    PostMessage(fCurrentWindow, WM_KEYDOWN, VK_PLAY, 0);
+    PostMessage(fCurrentWindow, WM_KEYUP, VK_PLAY, 0);
+//    KeybdInput(VK_PLAY, 0);
+//    KeybdInput(VK_PLAY, KEYEVENTF_KEYUP);
+//    SendInput(Length(KeyInputs), KeyInputs[0], SizeOf(KeyInputs[0]));
+
+
+    GetWindowRect(fCurrentWindow, aRect);
+    aPoint.X := aRect.Width div 2;
+    aPoint.Y := aRect.Height div 2;
+//    Winapi.Windows.ClientToScreen(fCurrentWindow, aPoint);
+    var curParent := fCurrentWindow;
+    child := 0;
+    while True do
+    begin
+//      Winapi.Windows.ScreenToClient(curParent, aPoint);
+      child := RealChildWindowFromPoint(curParent, aPoint);
+      if (child = 0) or (child = curParent) then
+        Break;
+    end;
+
+
+    PostMessage(curParent, WM_LBUTTONDOWN, 1, MakeLParam(aRect.Width div 2, aRect.Height div 2));
+//    PostMessage(fCurrentWindow, WM_LBUTTONDOWN, 1, MakeLParam(aRect.Width div 2, aRect.Height div 2));
+    PostMessage(curParent, WM_LBUTTONUP, 1, MakeLParam(aRect.Width div 2, aRect.Height div 2));
+//    PostMessage(fCurrentWindow, WM_LBUTTONUP, 1, MakeLParam(aRect.Width div 2, aRect.Height div 2));
+
+//    SwitchToThisWindow(Handle, True);
+
+//    oldPoint := mouse.CursorPos;
+//    aPoint.X := aRect.Width div 2;
+//    aPoint.Y := aRect.Height div 2;
+//    Winapi.Windows.ClientToScreen(fCurrentWindow, aPoint);
+//    mouse.CursorPos := Point(aPoint.X, aPoint.Y);
+//    MouseInput(aPoint, MOUSEEVENTF_LEFTDOWN);
+//    MouseInput(aPoint, MOUSEEVENTF_LEFTUP);
+//    SendInput(Length(mouseInputs), mouseInputs[0], SizeOf(mouseInputs[0]));
+//    mouse.CursorPos := oldPoint;
+  end;
 end;
 
 procedure TForm1.actMuteToggleExecute(Sender: TObject);
