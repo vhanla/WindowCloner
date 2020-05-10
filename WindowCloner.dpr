@@ -9,7 +9,9 @@ uses
   Vcl.Forms,
   main in 'main.pas' {Form1},
   TUPopupMenu in 'TUPopupMenu.pas' {PopupForm},
-  frmAreaSelector in 'frmAreaSelector.pas' {formAreaSelector};
+  frmAreaSelector in 'frmAreaSelector.pas' {formAreaSelector},
+  VirtualDesktopManager in 'VirtualDesktopManager.pas',
+  VirtualDesktopAPI in 'VirtualDesktopAPI.pas';
 
 {$R *.res}
 

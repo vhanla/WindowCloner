@@ -137,6 +137,10 @@ object Form1: TForm1
       Caption = 'Mouse Cursor Mode'
       OnClick = MouseCursorMode1Click
     end
+    object FollowVirtualdesktop1: TMenuItem
+      Caption = 'Follow Virtual desktop'
+      OnClick = FollowVirtualdesktop1Click
+    end
     object N1: TMenuItem
       Caption = '-'
     end
@@ -236,7 +240,6 @@ object Form1: TForm1
       end
       item
         Action = actPlayPause
-        Hint = 'Play/Pause'
         Icon.Data = {
           0000010001001010000001002000680400001600000028000000100000002000
           0000010020000000000000000000000000000000000000000000000000000000

@@ -7,7 +7,9 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, UCL.Form, Vcl.ExtCtrls, UCL.ThemeManager, TUPopupMenu,
   Vcl.Menus, UCL.PopupMenu, System.ImageList, Vcl.ImgList, DWMApi, PsAPI,
   System.Actions, Vcl.ActnList, Vcl.StdCtrls, ShellApi, madExceptVcl,
-  System.Win.TaskbarCore, Vcl.Taskbar, Vcl.JumpList;
+  System.Win.TaskbarCore, Vcl.Taskbar, Vcl.JumpList,
+  // VirtualDesktopManager
+  VirtualDesktopManager;
 
 const
   WM_MOUSE_EVENT = WM_USER + 9;
@@ -106,6 +108,7 @@ type
     Taskbar1: TTaskbar;
     JumpList1: TJumpList;
     actPlayPause: TAction;
+    FollowVirtualdesktop1: TMenuItem;
     procedure FormDblClick(Sender: TObject);
     procedure tmrFSMouseTimer(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -134,6 +137,7 @@ type
     procedure MouseCursorMode1Click(Sender: TObject);
     procedure SelectRegion1Click(Sender: TObject);
     procedure actPlayPauseExecute(Sender: TObject);
+    procedure FollowVirtualdesktop1Click(Sender: TObject);
   private
     { Private declarations }
     fFullScreenState: Boolean;
@@ -164,6 +168,7 @@ type
     procedure WM_WindowPosChanged(var Msg: TWMWindowPosChanged);message WM_WINDOWPOSCHANGED;
   public
     { Public declarations }
+    procedure CurrentDesktopChanged(Sender: TObject; OldDesktop, NewDesktop: TVirtualDesktop);
   published
     property FullScreen: Boolean read fFullScreenState write SetFullScreen;
     property ClickThrough: Boolean read fClickThrough write SetClickThrough;
@@ -352,9 +357,23 @@ begin
   Params.WinClassName := 'WindowClonerHwnd';
 end;
 
+procedure TForm1.CurrentDesktopChanged(Sender: TObject; OldDesktop,
+  NewDesktop: TVirtualDesktop);
+begin
+  if FollowVirtualdesktop1.Checked then
+  begin
+    DesktopManager.MoveWindowToDesktop(Handle, NewDesktop);
+  end;
+end;
+
 procedure TForm1.Exit2Click(Sender: TObject);
 begin
   Close;
+end;
+
+procedure TForm1.FollowVirtualdesktop1Click(Sender: TObject);
+begin
+  FollowVirtualdesktop1.Checked := not FollowVirtualdesktop1.Checked;
 end;
 
 procedure TForm1.FormActivate(Sender: TObject);
@@ -401,6 +420,12 @@ begin
   fListAudioSessions := TListAudioSession.Create;
 
   RunHook(Handle);
+
+  // virtual desktop handling
+  with DesktopManager do
+  begin
+    OnCurrentDesktopChanged := CurrentDesktopChanged;
+  end;
 end;
 
 procedure TForm1.FormDblClick(Sender: TObject);
