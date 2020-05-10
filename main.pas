@@ -199,7 +199,7 @@ implementation
 
 {$R *.dfm}
 
-uses frmAreaSelector;
+uses frmAreaSelector, frmAboutForm;
 
 procedure TForm1.mnuSwitchToWindowClick(Sender: TObject);
 begin
@@ -217,7 +217,9 @@ end;
 
 procedure TForm1.About1Click(Sender: TObject);
 begin
-  MessageDlg('WindowCloner v1.0'#13#10#13#10'Author: vhanla'#13#10'https://github.com/vhanla/WindowCloner',mtInformation,[mbOK],0);
+  FormStyle := fsNormal;
+  frmAbout.ShowModal;
+  FormStyle := fsStayOnTop;
 end;
 
 procedure TForm1.actPlayPauseExecute(Sender: TObject);
