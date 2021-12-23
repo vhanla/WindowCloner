@@ -4,12 +4,12 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, UCL.Form, Vcl.ExtCtrls, UCL.ThemeManager, TUPopupMenu,
-  Vcl.Menus, UCL.PopupMenu, System.ImageList, Vcl.ImgList, DWMApi, PsAPI,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, UWP.Form, Vcl.ExtCtrls, UWP.ColorManager, TUPopupMenu,
+  Vcl.Menus, UWP.PopupMenu, System.ImageList, Vcl.ImgList, DWMApi, PsAPI,
   System.Actions, Vcl.ActnList, Vcl.StdCtrls, ShellApi, madExceptVcl,
   System.Win.TaskbarCore, Vcl.Taskbar, Vcl.JumpList,
   // VirtualDesktopManager
-  VirtualDesktopManager;
+  VirtualDesktopManager, AudioSessionService;
 
 const
   WM_MOUSE_EVENT = WM_USER + 9;
@@ -23,6 +23,11 @@ const
   DWM_NORMAL_APP_NOT_CLOAKED = 8; // invented number, might have issues on newest versions of window 10 2020 or earlier not tested
 
 type
+  PChildWindowInfo = ^TChildWindowInfo;
+  TChildWindowInfo = record
+    ownerPid: UINT;
+    childPid: UINT;
+  end;
 
   TArrayMenu = array[0..0] of TMenuItem;
   PArrayMenu = ^TArrayMenu;
@@ -47,30 +52,30 @@ type
 
   TAspectRatio = (arNormal, ar1_1, ar4_3, ar16_9);
 
-  PAudioSessionModel = ^TAudioSessionModel;
-  TAudioSessionModel = record
-    DisplayName: String;
-    IconPath: String;
-    GroupingId: TGUID;
-    SessionId: LongWord;
-    ProcessId: LongWord;
-    BackgroundColor: LongWord;
-    Volume: Single;
-    IsDesktop: Boolean;
-    IsMuted: Boolean;
-    VolumePeak: Single;
-  end;
+//  PAudioSessionModel = ^TAudioSessionModel;
+//  TAudioSessionModel = record
+//    DisplayName: String;
+//    IconPath: String;
+//    GroupingId: TGUID;
+//    SessionId: LongWord;
+//    ProcessId: LongWord;
+//    BackgroundColor: LongWord;
+//    Volume: Single;
+//    IsDesktop: Boolean;
+//    IsMuted: Boolean;
+//    VolumePeak: Single;
+//  end;
 
-  TListAudioSession = class (TList)
-  private
-    function Get(Index: Integer): PAudioSessionModel;
-  public
-    function Add(Value: PAudioSessionModel): Integer;
-    procedure Notify(Ptr: Pointer; Action: TListNotification); override;
-    property Items[Index: Integer]: PAudioSessionModel read Get; default;
-  end;
+//  TListAudioSession = class (TList)
+//  private
+//    function Get(Index: Integer): PAudioSessionModel;
+//  public
+//    function Add(Value: PAudioSessionModel): Integer;
+//    procedure Notify(Ptr: Pointer; Action: TListNotification); override;
+//    property Items[Index: Integer]: PAudioSessionModel read Get; default;
+//  end;
 
-  TForm1 = class(TUForm)
+  TForm1 = class(TUWPForm)
     tmrFSMouse: TTimer;
     TrayIcon1: TTrayIcon;
     PopupMenu1: TPopupMenu;
@@ -109,6 +114,12 @@ type
     JumpList1: TJumpList;
     actPlayPause: TAction;
     FollowVirtualdesktop1: TMenuItem;
+    Hidewhentargetwindowosforeground1: TMenuItem;
+    N2: TMenuItem;
+    Showonmousehover1: TMenuItem;
+    RecordWinAltR1: TMenuItem;
+    mnuMinimize: TMenuItem;
+    AlwaysOnTop1: TMenuItem;
     procedure FormDblClick(Sender: TObject);
     procedure tmrFSMouseTimer(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -138,6 +149,9 @@ type
     procedure SelectRegion1Click(Sender: TObject);
     procedure actPlayPauseExecute(Sender: TObject);
     procedure FollowVirtualdesktop1Click(Sender: TObject);
+    procedure RecordWinAltR1Click(Sender: TObject);
+    procedure mnuMinimizeClick(Sender: TObject);
+    procedure AlwaysOnTop1Click(Sender: TObject);
   private
     { Private declarations }
     fFullScreenState: Boolean;
@@ -154,14 +168,17 @@ type
     fCurrentExecutable: String;
     fCurrentCaption: String;
     fDefaultExStyle: Integer;
-    fListAudioSessions: TListAudioSession;
     fCurrentMonitor: TMonitor;
+    AudioSession: TAudioSessionService;
+    fSessions: TListSessions;
+    FTopMost: Boolean;
     procedure SetFullScreen(Enabled: Boolean);
     procedure SetClickThrough(Enabled: Boolean);
     procedure SetOpacity(Sender: TObject);
     procedure ListWindows(var Menu: TMenuItem);
     procedure HandleWindowListClick(Sender: TObject);
     procedure SetWindowClone(AHandle: THandle; AspectRatio: TAspectRatio);
+    procedure SetTopMost(const Value: Boolean);
   protected
     procedure MouseEvent(var Msg: TMessage); message WM_MOUSE_EVENT;
     procedure CreateParams(var Params: TCreateParams); override;
@@ -172,6 +189,7 @@ type
   published
     property FullScreen: Boolean read fFullScreenState write SetFullScreen;
     property ClickThrough: Boolean read fClickThrough write SetClickThrough;
+    property TopMost: Boolean read FTopMost write SetTopMost;
   end;
 
 var
@@ -179,16 +197,16 @@ var
 
 procedure SwitchToThisWindow(h1: hWnd; x: bool); stdcall;
   external user32 Name 'SwitchToThisWindow';
-function RefreshAudioSessions: Integer; stdcall;
-  external 'AudioHelper.dll' name 'RefreshAudioSessions';
-function GetAudioSessionCount: Integer; stdcall;
-  external 'AudioHelper.dll' name 'GetAudioSessionCount';
-function GetAudioSessions(var sessions: IntPtr): Integer; stdcall;
-  external 'AudioHelper.dll' name 'GetAudioSessions';
-function SetAudioSessionVolume(sessionId: LongWord; volume: Single): Integer; stdcall;
-  external 'AudioHelper.dll' name 'SetAudioSessionVolume';
-function SetAudioSessionMute(sessionId: LongWord; isMuted: boolean): Integer; stdcall;
-  external 'AudioHelper.dll' name 'SetAudioSessionMute';
+//function RefreshAudioSessions: Integer; stdcall;
+//  external 'AudioHelper.dll' name 'RefreshAudioSessions';
+//function GetAudioSessionCount: Integer; stdcall;
+//  external 'AudioHelper.dll' name 'GetAudioSessionCount';
+//function GetAudioSessions(var sessions: IntPtr): Integer; stdcall;
+//  external 'AudioHelper.dll' name 'GetAudioSessions';
+//function SetAudioSessionVolume(sessionId: LongWord; volume: Single): Integer; stdcall;
+//  external 'AudioHelper.dll' name 'SetAudioSessionVolume';
+//function SetAudioSessionMute(sessionId: LongWord; isMuted: boolean): Integer; stdcall;
+//  external 'AudioHelper.dll' name 'SetAudioSessionMute';
 function RunHook(AHandle: HWND):BOOL; stdcall;
   external 'MouseHook.dll' name 'RunHook';
 function IsHooked:BOOL; stdcall;
@@ -200,6 +218,11 @@ implementation
 {$R *.dfm}
 
 uses frmAreaSelector, frmAboutForm;
+
+procedure TForm1.mnuMinimizeClick(Sender: TObject);
+begin
+  Perform(WM_SYSCOMMAND, SC_MINIMIZE, 0);
+end;
 
 procedure TForm1.mnuSwitchToWindowClick(Sender: TObject);
 begin
@@ -301,37 +324,54 @@ begin
   end;
 end;
 
+procedure TForm1.AlwaysOnTop1Click(Sender: TObject);
+begin
+  TopMost := not TopMost;
+
+  AlwaysOnTop1.Checked := TopMost;
+end;
+
 procedure TForm1.actMuteToggleExecute(Sender: TObject);
 var
-  sessionCount: Integer;
-  rawSessionsPtr: IntPtr;
-  sizeOfAudioSessionPtr: Integer;
-  pSession: PAudioSessionModel;
-  window: IntPtr;
+//  sessionCount: Integer;
+//  rawSessionsPtr: IntPtr;
+//  sizeOfAudioSessionPtr: Integer;
+//  pSession: PAudioSessionModel;
+//  window: IntPtr;
   I: Integer;
   fExecutable: String;
 begin
-  RefreshAudioSessions;
-  sessionCount := GetAudioSessionCount;
+  AudioSession.RefreshAudioSessions;
+//  sessionCount := AudioSession.GetAudioSessionCount;
 
-  fListAudioSessions.Clear;
+  if fSessions <> nil then
+    fSessions.Clear
+  else
+    fSessions := TListSessions.Create;
 
-  GetAudioSessions(rawSessionsPtr);
-  sizeOfAudioSessionPtr := SizeOf(TAudioSessionModel);
 
-  for I := 0 to sessionCount - 1 do
+//  fListAudioSessions.Clear;
+
+//  AudioSession.GetAudioSessions(rawSessionsPtr);
+  AudioSession.GetAudioSessions(fSessions);
+//  sizeOfAudioSessionPtr := SizeOf(TAudioSessionModel);
+
+//  for I := 0 to sessionCount - 1 do
+  for I := 0 to fSessions.Count - 1 do
   begin
-    GetMem(pSession, sizeOfAudioSessionPtr);
-    window := rawSessionsPtr + sizeOfAudioSessionPtr * I;
-    CopyMemory(pSession, Pointer(window), sizeOfAudioSessionPtr);
-    fListAudioSessions.Add(pSession);
-    if (fCurrentExecutable = PChar(pSession^.DisplayName))
-    and (pSession^.VolumePeak > 0)
-    and (not pSession^.IsMuted)
+//    GetMem(pSession, sizeOfAudioSessionPtr);
+//    window := rawSessionsPtr + sizeOfAudioSessionPtr * I;
+//    window := fSessions + sizeOfAudioSessionPtr * I;
+//    CopyMemory(pSession, Pointer(window), sizeOfAudioSessionPtr);
+//    fListAudioSessions.Add(pSession);
+//    if (fCurrentExecutable = PChar(pSession^.DisplayName))
+    if (LowerCase(fCurrentExecutable) = LowerCase(fSessions[I].DisplayName))
+    and (fSessions[I].PeekValue > 0)
+    and (not fSessions[I].IsMuted)
     then
-      SetAudioSessionMute(pSession^.SessionId, True)
+      AudioSession.SetAudioSessionMute(fSessions[I].SessionId, True)
     else
-      SetAudioSessionMute(pSession^.SessionId, False);
+      AudioSession.SetAudioSessionMute(fSessions[I].SessionId, False);
   end;
 end;
 
@@ -389,8 +429,10 @@ var
   I: Integer;
   AItem: TMenuItem;
 begin
+  AudioSession := TAudioSessionService.Create;
+  fSessions := TListSessions.Create;
   tmrFSMouse.Enabled := False;
-  ThemeManager.ThemeType := TUThemeType.ttDark;
+  ColorizationManager.ColorizationType := TUWPColorizationType.ctDark;
 
   BorderIcons := [];
   fBorderStyle := BorderStyle;
@@ -409,6 +451,7 @@ begin
   FormStyle := fsStayOnTop;
 
   SetWindowLong(Handle, GWL_EXSTYLE, GetWindowLong(Handle, GWL_EXSTYLE) or WS_EX_LAYERED);
+  SetWindowLong(Handle, GWL_STYLE, GetWindowLong(Handle, GWL_STYLE) or WS_MINIMIZEBOX or WS_SYSMENU);
 
   SetLayeredWindowAttributes(Handle, 0, 255, LWA_ALPHA);
 
@@ -419,7 +462,7 @@ begin
 
   Application.OnActivate := FormActivate;
 
-  fListAudioSessions := TListAudioSession.Create;
+//  fListAudioSessions := TListAudioSession.Create;
 
   RunHook(Handle);
 
@@ -439,11 +482,15 @@ end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
-  fListAudioSessions.Free;
+//  fListAudioSessions.Free;
   fListApps.Free;
   fPopupMenu.Free;
 
   KillHook;
+
+  if fSessions <> nil then
+    fSessions.Free;
+  AudioSession.Free;
 end;
 
 procedure TForm1.FormMouseDown(Sender: TObject; Button: TMouseButton;
@@ -550,6 +597,20 @@ begin
   RunHook(Handle);
 end;
 
+function EnumChildWindowsProc(Wnd: HWND; ChildInfo: PChildWindowInfo): BOOL; export; stdcall;
+var
+  aPID: DWORD;
+begin
+  Result := False;
+  aPID := 0;
+  GetWindowThreadProcessId(Wnd,aPID);
+  if aPID <> ChildInfo.ownerPid then
+  begin
+    ChildInfo.childPid := aPID;
+    Result := True;
+  end;
+end;
+
 // Lists windows and also updates TMenuItem holding them
 procedure TForm1.ListWindows(var Menu: TMenuItem);
 type
@@ -582,6 +643,9 @@ var
    aIcon: TIcon;
    lpsfi: SHFILEINFO;
    fIconIndex: WORD;
+
+   windowInfo: TChildWindowInfo;
+   GuiInfo: TGUIThreadInfo;
 begin
   I := GetTickCount64;
 
@@ -642,12 +706,23 @@ begin
             begin
               nSize := MAX_PATH;
               ZeroMemory(@FileName, MAX_PATH);
+              // WinVista +
               @QueryFullProcessImageName := GetProcAddress(GetModuleHandle(kernel32), 'QueryFullProcessImageNameW');
               if Assigned(QueryFullProcessImageName) then
                 if QueryFullProcessImageName(hProcess, 0, FileName, @nSize) then
                 begin
                   SetString(WinFileName, PChar(@FileName[0]), nSize);
                   StrPLCopy(fAppItem.FilePath, WinFileName, High(fAppItem.FilePath));
+                  if WinFileName.Contains('32\ApplicationFrameHost.exe') then
+                  begin
+                    // let's find the right UWP executable
+                    fAppItem.FilePath := 'UWP APP';
+                    windowInfo.ownerPid := PID;
+                    windowInfo.childPid := PID;
+                    GetGUIThreadInfo(PID,GuiInfo);
+                    EnumChildWindows(LHWindow,@EnumChildWindowsProc,LParam(@windowInfo));
+                    Sleep(1);
+                  end;
                   //fAppItem.Executable := ExtractFileName(FileName);
                 end;
             end;
@@ -700,7 +775,7 @@ begin
   for I := 0 to fListApps.Count - 1 do
   begin
     fMenues[I] := TMenuItem.Create(WindowMenu);
-    fMenues[I].Caption := fListApps.Items[I].Caption;
+    fMenues[I].Caption := fListApps.Items[I].Caption; //.FilePath
     fMenues[I].Tag := fListApps.Items[I].Handle;
     fMenues[I].OnClick := HandleWindowListClick;
     fMenues[I].ImageIndex := I;
@@ -719,6 +794,25 @@ end;
 procedure TForm1.PopupMenu1Popup(Sender: TObject);
 begin
   ListWindows(ListWindows1);
+end;
+
+procedure TForm1.RecordWinAltR1Click(Sender: TObject);
+begin
+  if FullScreen then
+  begin
+    keybd_event(VK_LWIN,MapVirtualKey(VK_LWIN,0),0,0);
+    Sleep(10);
+    keybd_event(VK_MENU,MapVirtualKey(VK_MENU,0),0,0);
+    Sleep(10);
+    keybd_event(Ord('R'),MapVirtualKey(Ord('R'),0),0,0);
+    Sleep(10);
+    keybd_event(Ord('R'),MapVirtualKey(Ord('R'),0),KEYEVENTF_KEYUP,0);
+    Sleep(100);
+    keybd_event(VK_MENU,MapVirtualKey(VK_MENU,0),KEYEVENTF_KEYUP,0);
+    Sleep(100);
+    keybd_event(VK_LWIN,MapVirtualKey(VK_LWIN,0),KEYEVENTF_KEYUP,0);
+    Sleep(100);
+  end;
 end;
 
 procedure TForm1.SelectRegion1Click(Sender: TObject);
@@ -761,9 +855,9 @@ begin
     fPrevRect.Height := Height;
     Left := fCurrentMonitor.Left;
     Top := fCurrentMonitor.Top;
-    ClientWidth := fCurrentMonitor.Width;
-    ClientHeight := fCurrentMonitor.Height;
     BorderStyle := bsNone;
+    Width := fCurrentMonitor.Width;
+    Height := fCurrentMonitor.Height;
     tmrFSMouse.Enabled := True;
   end
   else
@@ -799,6 +893,18 @@ begin
   end;
 end;
 
+procedure TForm1.SetTopMost(const Value: Boolean);
+begin
+  if FTopMost <> Value then
+  begin
+    FTopMost := Value;
+    if FTopMost then
+      FormStyle := fsStayOnTop
+    else
+      FormStyle := fsNormal;
+  end;
+end;
+
 procedure TForm1.SetWindowClone(AHandle: THandle; AspectRatio: TAspectRatio);
 var
   ThumbProp: DWM_THUMBNAIL_PROPERTIES;
@@ -824,12 +930,10 @@ begin
       ThumbProp.fSourceClientAreaOnly := False;
       ThumbProp.fVisible := True;
       ThumbProp.opacity := 255;
-      ThumbProp.rcDestination := Rect(
-        0,
-        0,
-        ClientWidth,
-        ClientHeight
-      );
+      if Borderless1.Checked then
+      ThumbProp.rcDestination := Rect(0,0,ClientWidth,ClientHeight)
+      else
+      ThumbProp.rcDestination := Rect(0,1,ClientWidth,ClientHeight);
       DwmUpdateThumbnailProperties(fThumbWindow, ThumbProp);
     end;
 
@@ -927,21 +1031,21 @@ end;
 
 { TListAudioSession }
 
-function TListAudioSession.Add(Value: PAudioSessionModel): Integer;
-begin
-  Result := inherited Add(Value);
-end;
-
-function TListAudioSession.Get(Index: Integer): PAudioSessionModel;
-begin
-  Result := PAudioSessionModel(inherited Get(Index));
-end;
-
-procedure TListAudioSession.Notify(Ptr: Pointer; Action: TListNotification);
-begin
-  inherited;
-  if Action = lnDeleted then
-    FreeMem(Ptr);
-end;
+//function TListAudioSession.Add(Value: PAudioSessionModel): Integer;
+//begin
+//  Result := inherited Add(Value);
+//end;
+//
+//function TListAudioSession.Get(Index: Integer): PAudioSessionModel;
+//begin
+//  Result := PAudioSessionModel(inherited Get(Index));
+//end;
+//
+//procedure TListAudioSession.Notify(Ptr: Pointer; Action: TListNotification);
+//begin
+//  inherited;
+//  if Action = lnDeleted then
+//    FreeMem(Ptr);
+//end;
 
 end.
