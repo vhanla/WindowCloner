@@ -141,7 +141,29 @@ object Form1: TForm1
       Caption = 'Follow Virtual desktop'
       OnClick = FollowVirtualdesktop1Click
     end
+    object RecordWinAltR1: TMenuItem
+      Caption = 'Start/Stop Record (Win+Alt+R)'
+      OnClick = RecordWinAltR1Click
+    end
     object N1: TMenuItem
+      Caption = '-'
+    end
+    object AlwaysOnTop1: TMenuItem
+      Caption = 'Always On Top'
+      Checked = True
+      OnClick = AlwaysOnTop1Click
+    end
+    object mnuMinimize: TMenuItem
+      Caption = 'Minimize'
+      OnClick = mnuMinimizeClick
+    end
+    object Hidewhentargetwindowosforeground1: TMenuItem
+      Caption = 'Hide when target  foreground'
+    end
+    object Showonmousehover1: TMenuItem
+      Caption = 'Show on mouse hover hidden '
+    end
+    object N2: TMenuItem
       Caption = '-'
     end
     object Settings1: TMenuItem
@@ -361,7 +383,6 @@ object Form1: TForm1
   end
   object JumpList1: TJumpList
     AutoRefresh = True
-    Enabled = True
     CustomCategories = <
       item
         CategoryName = 'Actions'
