@@ -12,7 +12,7 @@ unit VirtualDesktopAPI;
 interface
 
 uses
-  Windows;
+  Windows, UITypes;
 
 const
   EMPTY_GUID: TGUID = '{00000000-0000-0000-0000-000000000000}';
@@ -33,6 +33,7 @@ const
   IID_VirtualDesktopManagerInternal_14393: TGUID = '{F31574D6-B682-4CDC-BD56-1827860ABEC6}'; // build 14393 or later
   IID_VirtualDesktopManagerInternal_10240: TGUID = '{AF8DA486-95BB-4460-B3B7-6E7A6B2962B5}'; // build 10240 or later
   IID_VirtualDesktopManagerInternal_10130: TGUID = '{EF9F1A6C-D3CC-4358-B712-F84B635BEBE7}'; // build 10130 or later
+  IID_VirtualDesktopManagerInternal_22000: TGUID = '{B2F925B9-5A0F-4D2E-9F4D-2B1507593C10}'; // build 22000 or later
 //
   IID_VirtualDesktop: TGUID = '{FF72FFDD-BE7E-43FC-9C03-AD81681E88E4}';
 //
@@ -174,7 +175,7 @@ type
 
   { IVirtualDesktopNotification }
 
-  IVirtualDesktopNotification = interface(IUnknown)
+  IVirtualDesktopNotification = interface(IUnknown) //10240
     ['{C179334C-4295-40D3-BEA1-C654D965605A}']
     function VirtualDesktopCreated(Desktop: IVirtualDesktop): HRESULT; stdcall; // ok
     function VirtualDesktopDestroyBegin(Desktop: IVirtualDesktop; DesktopFallback: IVirtualDesktop): HRESULT; stdcall; // ok
@@ -182,6 +183,30 @@ type
     function VirtualDesktopDestroyed(Desktop: IVirtualDesktop; DesktopFallback: IVirtualDesktop): HRESULT; stdcall; // ok
     function ViewVirtualDesktopChanged(View: IApplicationView): HRESULT; stdcall; // ok
     function CurrentVirtualDesktopChanged(DesktopOld: IVirtualDesktop; DesktopNew: IVirtualDesktop): HRESULT; stdcall; // ok
+  end;
+
+  IVirtualDesktopNotification20231 = interface(IUnknown) //build 20231
+    ['{C179334C-4295-40D3-BEA1-C654D965605A}']
+    function VirtualDesktopCreated(Desktop: IVirtualDesktop): HRESULT; stdcall; // ok
+    function VirtualDesktopDestroyBegin(Desktop: IVirtualDesktop; DesktopFallback: IVirtualDesktop): HRESULT; stdcall; // ok
+    function VirtualDesktopDestroyFailed(Desktop: IVirtualDesktop; DesktopFallback: IVirtualDesktop): HRESULT; stdcall; // ok
+    function VirtualDesktopDestroyed(Desktop: IVirtualDesktop; DesktopFallback: IVirtualDesktop): HRESULT; stdcall; // ok
+    function ViewVirtualDesktopChanged(View: IApplicationView): HRESULT; stdcall; // ok
+    function CurrentVirtualDesktopChanged(DesktopOld: IVirtualDesktop; DesktopNew: IVirtualDesktop): HRESULT; stdcall; // ok
+  end;
+
+  IVirtualDesktopNotification21313 = interface(IUnknown) //build 21313
+    ['{C179334C-4295-40D3-BEA1-C654D965605A}']
+    function VirtualDesktopCreated(Desktop: IVirtualDesktop): HRESULT; stdcall; // ok
+    function VirtualDesktopDestroyBegin(Desktop: IVirtualDesktop; DesktopFallback: IVirtualDesktop): HRESULT; stdcall; // ok
+    function VirtualDesktopDestroyFailed(Desktop: IVirtualDesktop; DesktopFallback: IVirtualDesktop): HRESULT; stdcall; // ok
+    function VirtualDesktopDestroyed(Desktop: IVirtualDesktop; DesktopFallback: IVirtualDesktop): HRESULT; stdcall; // ok
+    function Unknown1(Number: Integer): HRESULT; stdcall;
+    function VirtualDesktopMoved(Desktop: IVirtualDesktop; nFromIndex: Integer; nToIndex: Integer): HRESULT; stdcall;
+    function VirtualDesktopRenamed(Desktop: IVirtualDesktop; chName: STRING): HRESULT; stdcall;
+    function ViewVirtualDesktopChanged(View: IApplicationView): HRESULT; stdcall; // ok
+    function CurrentVirtualDesktopChanged(DesktopOld: IVirtualDesktop; DesktopNew: IVirtualDesktop): HRESULT; stdcall; // ok
+    function VirtualDesktopWallpaperChanged(Desktop: IVirtualDesktop; chPath: STRING): HRESULT; stdcall;
   end;
 
   { IVirtualNotificationService }
