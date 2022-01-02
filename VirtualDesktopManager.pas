@@ -446,12 +446,17 @@ begin
       fEnabled := CheckError(fISP.QueryService(CLSID_VirtualDesktopAPI_Unknown, IID_VirtualDesktopManagerInternal_10240, fIVDMI));
     if not fEnabled then
       fEnabled := CheckError(fISP.QueryService(CLSID_VirtualDesktopAPI_Unknown, IID_VirtualDesktopManagerInternal_10130, fIVDMI));
+    if not fEnabled then
+      fEnabled := CheckError(fISP.QueryService(CLSID_VirtualDesktopAPI_Unknown, IID_VirtualDesktopManagerInternal_22000, fIVDMI));
     fEnabled := fEnabled and //
       CheckError(fISP.QueryService(CLSID_VirtualNotificationService, IID_VirtualNotificationService, fIVNS)) and //
       CheckError(fISP.QueryService(CLSID_ApplicationViewCollection, IID_ApplicationViewCollection, fIAVC)) and //
       CheckError(fISP.QueryService(CLSID_VirtualDesktopPinnedApps, IID_VirtualDesktopPinnedApps, fIVDPA));
     if fEnabled then
+    begin
       fEnabled := CheckError(fIVNS.Register(Self, @fCookie));
+//      OleCheck(fIVNS.Register(Self, @fCookie));
+    end;
   end;
   if not fEnabled then
     Finalize;
